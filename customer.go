@@ -51,6 +51,7 @@ type Customer struct {
 	OpenBalanceDate Date        `json:",omitempty"`
 	BalanceWithJobs json.Number `json:",omitempty"`
 	//CurrencyRef
+	IsProject bool `json:"IsProject"`
 }
 
 // GetAddress prioritizes the ship address, but falls back on bill address
@@ -164,6 +165,153 @@ func (c *Client) FetchCustomerByID(id string) (*Customer, error) {
 	}
 	err = json.NewDecoder(res.Body).Decode(&r)
 	return &r.Customer, err
+}
+
+func (c *Client) getReport(url string) (*Report, error) {
+	var req *http.Request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Accept", "application/json")
+	var res *http.Response
+	res, err = c.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.parseReport(res)
+}
+
+func (c *Client) parseReport(res *http.Response) (*Report, error) {
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New("Got status code " + strconv.Itoa(res.StatusCode))
+	}
+	var r Report
+	err := json.NewDecoder(res.Body).Decode(&r)
+	return &r, err
+}
+
+// SalesByCustomerID returns a the sales for the provided customer ID
+func (c *Client) SalesByCustomerID(id string) (*Report, error) {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/reports/CustomerSales/"
+	var v = url.Values{}
+	v.Add("minorversion", minorVersion)
+	// v.Add("start_date", "2020-01-01")
+	// v.Add("end_date", "2022-01-01")
+	v.Add("customer", id)
+	u.RawQuery = v.Encode()
+
+	return c.getReport(u.String())
+}
+
+func (c *Client) CashFlowByCustomerID(id string) (*Report, error) {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/reports/CashFlow/"
+	var v = url.Values{}
+	v.Add("minorversion", minorVersion)
+	// v.Add("start_date", "2020-01-01")
+	// v.Add("end_date", "2022-01-01")
+	v.Add("customer", id)
+	u.RawQuery = v.Encode()
+
+	return c.getReport(u.String())
+}
+
+func (c *Client) ProfitAndLossByCustomerID(id string) (*Report, error) {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/reports/ProfitAndLoss/"
+	var v = url.Values{}
+	v.Add("minorversion", minorVersion)
+	// v.Add("summarize_column_by", "Departments")
+	// v.Add("start_date", "2020-01-01")
+	// v.Add("end_date", "2022-01-01")
+	v.Add("customer", id)
+	u.RawQuery = v.Encode()
+
+	return c.getReport(u.String())
+}
+
+func (c *Client) ProfitAndLossDetailsByCustomerID(id string) (*Report, error) {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/reports/ProfitAndLossDetail/"
+	var v = url.Values{}
+	v.Add("minorversion", minorVersion)
+	// v.Add("summarize_column_by", "Departments")
+	v.Add("start_date", "2022-01-01")
+	v.Add("end_date", "2022-03-01")
+	v.Add("customer", id)
+	u.RawQuery = v.Encode()
+
+	return c.getReport(u.String())
+}
+
+func (c *Client) TransactionList(customerID string) (*Report, error) {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/reports/TransactionList/"
+	var v = url.Values{}
+	v.Add("minorversion", minorVersion)
+	// v.Add("summarize_column_by", "Departments")
+	// v.Add("start_date", "2022-01-01")
+	// v.Add("end_date", "2022-03-01")
+	v.Add("group_by", "Transaction Type")
+	v.Add("customer", customerID)
+	u.RawQuery = v.Encode()
+
+	return c.getReport(u.String())
+}
+
+func (c *Client) CustomerIncome(customerID string) (*Report, error) {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/reports/CustomerIncome/"
+	var v = url.Values{}
+	v.Add("minorversion", minorVersion)
+	// v.Add("summarize_column_by", "Departments")
+	// v.Add("start_date", "2022-01-01")
+	// v.Add("end_date", "2022-03-01")
+	v.Add("group_by", "Transaction Type")
+	v.Add("customer", customerID)
+	u.RawQuery = v.Encode()
+
+	return c.getReport(u.String())
+}
+
+func (c *Client) AccountList(customerID string) (*Report, error) {
+	var u, err = url.Parse(string(c.Endpoint))
+	if err != nil {
+		return nil, err
+	}
+	u.Path = "/v3/company/" + c.RealmID + "/reports/AccountList/"
+	var v = url.Values{}
+	v.Add("minorversion", minorVersion)
+	// v.Add("summarize_column_by", "Departments")
+	// v.Add("start_date", "2022-01-01")
+	// v.Add("end_date", "2022-03-01")
+	// v.Add("group_by", "Transaction Type")
+	v.Add("customer", customerID)
+	u.RawQuery = v.Encode()
+
+	return c.getReport(u.String())
 }
 
 // CreateCustomer creates the given Customer on the QuickBooks server,
