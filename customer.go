@@ -252,8 +252,8 @@ func (c *Client) ProfitAndLossDetailsByCustomerID(id string) (*Report, error) {
 	var v = url.Values{}
 	v.Add("minorversion", minorVersion)
 	// v.Add("summarize_column_by", "Departments")
-	v.Add("start_date", "2022-01-01")
-	v.Add("end_date", "2022-03-01")
+	// v.Add("start_date", "2022-01-01")
+	// v.Add("end_date", "2022-03-01")
 	v.Add("customer", id)
 	u.RawQuery = v.Encode()
 
