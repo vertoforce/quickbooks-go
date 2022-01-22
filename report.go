@@ -26,8 +26,8 @@ type MainHeader struct {
 	Time        string   `json:"Time"`
 	ReportName  string   `json:"ReportName"`
 	ReportBasis string   `json:"ReportBasis"`
-	StartPeriod string   `json:"StartPeriod"`
-	EndPeriod   string   `json:"EndPeriod"`
+	StartPeriod Date     `json:"StartPeriod"`
+	EndPeriod   Date     `json:"EndPeriod"`
 	Currency    string   `json:"Currency"`
 	Customer    string   `json:"Customer"`
 	Option      []Option `json:"Option"`
